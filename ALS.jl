@@ -16,7 +16,7 @@ function khatri_rao(A, B)
     return res
 end
 
-function als_tensor(X, R, max_iter=100)
+function als_tensor(X, R, max_iter=1000)
     dims = size(X)
     
     num_factors = length(dims)
@@ -28,15 +28,16 @@ function als_tensor(X, R, max_iter=100)
     for iter in 1:max_iter
         for k in 1:num_factors
             for j in 1:dims[k]
-                BC_kr = ones(1, R)
+                
+                left_side = ones(1, R)
                 for i in 1:num_factors
                     if i != k
-                        BC_kr = khatri_rao(BC_kr, factors[i])
+                        left_side = khatri_rao(left_side, factors[i])
                     end
                 end
-                X_slice = vec(get_slice(X, k, j, length(dims)))
+                right_side = vec(get_slice(X, k, j, length(dims)))
                 
-                factors[k][j, :] = (BC_kr' * BC_kr) \ (BC_kr' * X_slice)
+                factors[k][j, :] = (left_side) \ (right_side)
             end
         end
     end
@@ -47,12 +48,15 @@ end
 n = 2
 m = 3
 k = 4
-tens = zeros(n,m,k)
+l = 5
+tens = zeros(n,m,k,l)
 
 for i in 1:n
      for j in 1:m
           for k in 1:k
-               tens[i,j,k] = i + j + k
+                for p in 1:l
+                    tens[i,j,k,p] = i + j + k + p
+                end
           end
      end
 end
